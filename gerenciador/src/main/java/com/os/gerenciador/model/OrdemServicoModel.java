@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,12 @@ public class OrdemServicoModel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario_executor")
     private UsuarioModel usuarioExecutor;
+
+    @Column(nullable = false)
+    private LocalDateTime dataCriacao;
+
+    @Column
+    private LocalDateTime dataFinalizacao;
 
     @OneToMany(mappedBy = "ordemServico", cascade = CascadeType.ALL)
     private List<HistoricoOrdemServicoModel> historicos = new ArrayList<>();

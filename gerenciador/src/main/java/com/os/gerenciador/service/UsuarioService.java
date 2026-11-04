@@ -43,6 +43,7 @@ public class UsuarioService {
             usuarioModel.setTelefone(usuarioRequestDto.telefone());
             usuarioModel.setEmail(usuarioRequestDto.email());
             usuarioModel.setSenha(usuarioRequestDto.senha());
+            usuarioModel.setDataNascimento(usuarioRequestDto.dataNascimento());
 
             TipoUsuarioModel tipoUsuarioModel = tipoUsuarioRepository.findById(usuarioRequestDto.tipoUsuario()).get();
             usuarioModel.setTipoUsuarioModel(tipoUsuarioModel);

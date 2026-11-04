@@ -39,7 +39,7 @@ public class UsuarioModel {
     private String telefone;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @JoinColumn(name = "id_tipo_usuario")
+    @JoinColumn(name = "id_tipo_usuario", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private TipoUsuarioModel tipoUsuarioModel;
 

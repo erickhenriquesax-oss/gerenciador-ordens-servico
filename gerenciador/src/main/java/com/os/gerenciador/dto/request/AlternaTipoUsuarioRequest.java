@@ -4,6 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record AlternaTipoUsuarioRequest(
-        @NotNull @NotBlank Long id
+        @NotNull Long id
         ) {
 }
