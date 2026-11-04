@@ -1,15 +1,20 @@
+
 package com.os.gerenciador.model;
 
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.os.gerenciador.Enums.UserRoles;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 
+
 @Entity
 @Table(name = "tb_tipo_usuario")
-public class TipoUsuario {
+@Getter @Setter
+public class TipoUsuarioModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,10 +24,10 @@ public class TipoUsuario {
     private String descricao;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @OneToMany(mappedBy = "tipo_usuario", fetch = FetchType.LAZY)
-    private Set<UsuarioModel> usuarios = new HashSet<UsuarioModel>();
+    @OneToMany(mappedBy = "tipoUsuarioModel", fetch = FetchType.LAZY)
+    private Set<UsuarioModel> usuarios = new HashSet<>();
 
     public UserRoles toUserRole() {
-        return UserRoles.fromCodigo(this.idTipoUsuario);
+        return UserRoles.fromCodigo(this.id);
     }
 }
