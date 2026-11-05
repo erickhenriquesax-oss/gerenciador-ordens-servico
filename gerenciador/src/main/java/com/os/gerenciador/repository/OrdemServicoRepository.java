@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface OrdemServicoRepository extends JpaRepository<OrdemServicoModel, Long> {
 
-    List<OrdemServicoModel> findAllByTipoUsuarioModel_Id(Long tipoUsuarioId);
+    List<OrdemServicoModel> findAllByUsuarioSolicitante_Id(Long usuarioId);
 }

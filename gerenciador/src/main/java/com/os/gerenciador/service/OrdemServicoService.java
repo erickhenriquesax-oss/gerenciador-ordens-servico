@@ -90,7 +90,7 @@ public class OrdemServicoService {
 
     @Transactional
     public List<OrdemServicoModel> getOrdemServicosByUsuario(Long usuarioId) {
-        return ordemServicoRepository.findAllByTipoUsuarioModel_Id(usuarioId);
+        return ordemServicoRepository.findAllByUsuarioSolicitante_Id(usuarioId);
     }
 
 
