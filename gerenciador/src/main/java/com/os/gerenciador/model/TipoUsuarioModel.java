@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.os.gerenciador.Enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +18,9 @@ import java.util.Set;
 @Entity
 @Table(name = "tb_tipo_usuario")
 @Getter @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TipoUsuarioModel {
 
     @Id
@@ -25,6 +32,7 @@ public class TipoUsuarioModel {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @OneToMany(mappedBy = "tipoUsuarioModel", fetch = FetchType.LAZY)
+    @Default
     private Set<UsuarioModel> usuarios = new HashSet<>();
 
     public UserRoles toUserRole() {

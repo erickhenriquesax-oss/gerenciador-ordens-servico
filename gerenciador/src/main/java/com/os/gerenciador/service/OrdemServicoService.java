@@ -6,6 +6,8 @@ import com.os.gerenciador.dto.request.OrdemServicoExecutorRequest;
 import com.os.gerenciador.dto.request.OrdemServicoRequestDto;
 import com.os.gerenciador.model.OrdemServicoModel;
 import com.os.gerenciador.model.UsuarioModel;
+import com.os.gerenciador.mapper.OrdemServicoMapper;
+import com.os.gerenciador.dto.response.OrdemServicoResponseDto;
 import com.os.gerenciador.repository.OrdemServicoRepository;
 import com.os.gerenciador.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,7 +29,7 @@ public class OrdemServicoService {
     private UsuarioRepository usuarioRepository;
 
     @Transactional
-    public OrdemServicoModel save(OrdemServicoRequestDto ordemServicoDto) {
+    private OrdemServicoModel saveEntity(OrdemServicoRequestDto ordemServicoDto) {
 
         UsuarioModel solicitante = usuarioRepository.findById(ordemServicoDto.usuarioSolicitante())
                 .orElseThrow(() -> new EntityNotFoundException("Solicitante não encontrado"));
@@ -36,16 +38,12 @@ public class OrdemServicoService {
                     "Somente usuários com papel SOLICITANTE podem abrir ordens."
             );
         }
-        OrdemServicoModel ordem = new OrdemServicoModel();
-        ordem.setDescricao(ordemServicoDto.descricao());
-        ordem.setStatus(StatusOS.ABERTA);
-        ordem.setUsuarioSolicitante(solicitante);
-        ordem.setDataCriacao(LocalDateTime.now());
+        OrdemServicoModel ordem = OrdemServicoMapper.toModel(ordemServicoDto, solicitante);
         return ordemServicoRepository.save(ordem);
     }
 
     @Transactional
-    public OrdemServicoModel atribuirExecutor(Long ordemId, OrdemServicoExecutorRequest ordemServicoExecutorRequest) {
+    private OrdemServicoModel atribuirExecutorEntity(Long ordemId, OrdemServicoExecutorRequest ordemServicoExecutorRequest) {
         OrdemServicoModel ordem = ordemServicoRepository.findById(ordemId).orElseThrow(() -> new EntityNotFoundException("Ordem não encontrada"));
         UsuarioModel executor = usuarioRepository.findById(ordemServicoExecutorRequest.idExecutor()).orElseThrow(() -> new EntityNotFoundException("Executor não encontrado"));
 
@@ -62,7 +60,7 @@ public class OrdemServicoService {
     }
 
     @Transactional
-    public OrdemServicoModel finalizarOrdemServico(Long ordemId) {
+    private OrdemServicoModel finalizarEntity(Long ordemId) {
         OrdemServicoModel ordem = ordemServicoRepository.findById(ordemId).orElseThrow(() -> new EntityNotFoundException("Ordem não encontrada"));
         if(ordem.getStatus() != StatusOS.EM_PROCESSO) {
             throw new IllegalStateException("Apenas ordens de serviço em processo podem ser finalizadas.");
@@ -79,19 +77,26 @@ public class OrdemServicoService {
     }
 
     @Transactional
-    public Optional<OrdemServicoModel> getOrdemServicoById(Long ordemId) {
+    private Optional<OrdemServicoModel> findEntityById(Long ordemId) {
         return ordemServicoRepository.findById(ordemId);
     }
 
     @Transactional
-    public List<OrdemServicoModel> getAllOrdemServicos() {
+    private List<OrdemServicoModel> findAllEntities() {
         return ordemServicoRepository.findAll();
     }
 
     @Transactional
-    public List<OrdemServicoModel> getOrdemServicosByUsuario(Long usuarioId) {
+    private List<OrdemServicoModel> findEntitiesByUsuario(Long usuarioId) {
         return ordemServicoRepository.findAllByUsuarioSolicitante_Id(usuarioId);
     }
+
+    @Transactional public List<OrdemServicoResponseDto> getAllOrdemServicos() { return findAllEntities().stream().map(OrdemServicoMapper::toResponse).toList(); }
+    @Transactional public Optional<OrdemServicoResponseDto> getOrdemServicoById(Long id) { return findEntityById(id).map(OrdemServicoMapper::toResponse); }
+    @Transactional public List<OrdemServicoResponseDto> getOrdemServicosByUsuario(Long id) { return findEntitiesByUsuario(id).stream().map(OrdemServicoMapper::toResponse).toList(); }
+    @Transactional public OrdemServicoResponseDto save(OrdemServicoRequestDto request) { return OrdemServicoMapper.toResponse(saveEntity(request)); }
+    @Transactional public OrdemServicoResponseDto atribuirExecutor(Long id, OrdemServicoExecutorRequest request) { return OrdemServicoMapper.toResponse(atribuirExecutorEntity(id, request)); }
+    @Transactional public OrdemServicoResponseDto finalizarOrdemServico(Long id) { return OrdemServicoMapper.toResponse(finalizarEntity(id)); }
 
 
 }

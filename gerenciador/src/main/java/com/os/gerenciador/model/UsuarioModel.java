@@ -4,7 +4,11 @@ package com.os.gerenciador.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,6 +18,9 @@ import java.util.List;
 @Table(name = "tb_usuario")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UsuarioModel {
 
     @Id
@@ -44,12 +51,15 @@ public class UsuarioModel {
     private TipoUsuarioModel tipoUsuarioModel;
 
     @OneToMany(mappedBy = "usuarioSolicitante")
+    @Default
     private List<OrdemServicoModel> ordensComoSolicitante = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuarioExecutor")
+    @Default
     private List<OrdemServicoModel> ordensComoExecutor = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuarioHistorico")
+    @Default
     private List<HistoricoOrdemServicoModel> usuarioHistorico = new ArrayList<>();
 
 }

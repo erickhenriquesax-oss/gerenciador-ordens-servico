@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.os.gerenciador.Enums.StatusOS;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,6 +19,9 @@ import java.util.List;
 @Table(name = "tb_ordem")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrdemServicoModel {
 
     @Id
@@ -45,6 +52,7 @@ public class OrdemServicoModel {
     private LocalDateTime dataFinalizacao;
 
     @OneToMany(mappedBy = "ordemServico", cascade = CascadeType.ALL)
+    @Default
     private List<HistoricoOrdemServicoModel> historicos = new ArrayList<>();
 
 

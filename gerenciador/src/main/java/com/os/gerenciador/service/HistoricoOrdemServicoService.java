@@ -4,16 +4,16 @@ import com.os.gerenciador.dto.request.HistoricoOrdemServicoRequest;
 import com.os.gerenciador.model.HistoricoOrdemServicoModel;
 import com.os.gerenciador.model.OrdemServicoModel;
 import com.os.gerenciador.model.UsuarioModel;
+import com.os.gerenciador.mapper.HistoricoOrdemServicoMapper;
+import com.os.gerenciador.dto.response.HistoricoOrdemServicoResponseDto;
 import com.os.gerenciador.repository.HistoricoOrdemServicoRepository;
 import com.os.gerenciador.repository.OrdemServicoRepository;
 import com.os.gerenciador.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,29 +29,25 @@ public class HistoricoOrdemServicoService {
     private UsuarioRepository usuarioRepository;
 
     @Transactional
-    public HistoricoOrdemServicoModel save(HistoricoOrdemServicoRequest historicoOrdemServicoRequest) {
+    private HistoricoOrdemServicoModel saveEntity(HistoricoOrdemServicoRequest historicoOrdemServicoRequest) {
         UsuarioModel usuario = usuarioRepository.findById(historicoOrdemServicoRequest.idUsuario())
                 .orElseThrow(() -> new EntityNotFoundException("Usuário para histórico não encontrado"));
 
         OrdemServicoModel ordem = ordemServicoRepository.findById(historicoOrdemServicoRequest.idOrdemServico())
                 .orElseThrow(() -> new EntityNotFoundException("Ordem de Serviço não encontrada"));
 
-        HistoricoOrdemServicoModel historico = new HistoricoOrdemServicoModel();
-        historico.setDataHistorico(LocalDateTime.now());
-        historico.setUsuarioHistorico(usuario);
-        historico.setOrdemServico(ordem);
-        historico.setDescricao(historicoOrdemServicoRequest.descricao());
+        HistoricoOrdemServicoModel historico = HistoricoOrdemServicoMapper.toModel(historicoOrdemServicoRequest, usuario, ordem);
         return historicoOrdemServicoRepository.save(historico);
     }
 
     @Transactional
-    public HistoricoOrdemServicoModel findById(Long id) {
+    private HistoricoOrdemServicoModel findEntityById(Long id) {
         return historicoOrdemServicoRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Histórico de Ordem de Serviço não encontrada"));
     }
 
     @Transactional
-    public List<HistoricoOrdemServicoModel> findAll() {
+    private List<HistoricoOrdemServicoModel> findAllEntities() {
         return historicoOrdemServicoRepository.findAll();
     }
 
@@ -63,21 +59,21 @@ public class HistoricoOrdemServicoService {
     }
 
     @Transactional
-    public List<HistoricoOrdemServicoModel> findAllByUsuarioHistorico(Long id) {
+    private List<HistoricoOrdemServicoModel> findEntitiesByUsuario(Long id) {
         UsuarioModel usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
         return historicoOrdemServicoRepository.findAllByUsuarioHistorico(usuario);
     }
 
     @Transactional
-    public List<HistoricoOrdemServicoModel> findAllByOrdemServico(Long id){
+    private List<HistoricoOrdemServicoModel> findEntitiesByOrdem(Long id){
         OrdemServicoModel ordemServico = ordemServicoRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Ordem de Serviço não encontrada"));
         return historicoOrdemServicoRepository.findAllByOrdemServico(ordemServico);
     }
 
     @Transactional
-    public HistoricoOrdemServicoModel update(Long id,HistoricoOrdemServicoRequest historicoOrdemServicoRequest) {
+    private HistoricoOrdemServicoModel updateEntity(Long id,HistoricoOrdemServicoRequest historicoOrdemServicoRequest) {
         HistoricoOrdemServicoModel historico=historicoOrdemServicoRepository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Histórico não encontrado")
         );
@@ -91,4 +87,11 @@ public class HistoricoOrdemServicoService {
         historico.setDescricao(historicoOrdemServicoRequest.descricao());
         return historicoOrdemServicoRepository.save(historico);
     }
+
+    @Transactional public HistoricoOrdemServicoResponseDto save(HistoricoOrdemServicoRequest request) { return HistoricoOrdemServicoMapper.toResponse(saveEntity(request)); }
+    @Transactional public HistoricoOrdemServicoResponseDto findById(Long id) { return HistoricoOrdemServicoMapper.toResponse(findEntityById(id)); }
+    @Transactional public List<HistoricoOrdemServicoResponseDto> findAll() { return findAllEntities().stream().map(HistoricoOrdemServicoMapper::toResponse).toList(); }
+    @Transactional public List<HistoricoOrdemServicoResponseDto> findAllByUsuarioHistorico(Long id) { return findEntitiesByUsuario(id).stream().map(HistoricoOrdemServicoMapper::toResponse).toList(); }
+    @Transactional public List<HistoricoOrdemServicoResponseDto> findAllByOrdemServico(Long id) { return findEntitiesByOrdem(id).stream().map(HistoricoOrdemServicoMapper::toResponse).toList(); }
+    @Transactional public HistoricoOrdemServicoResponseDto update(Long id, HistoricoOrdemServicoRequest request) { return HistoricoOrdemServicoMapper.toResponse(updateEntity(id, request)); }
 }
