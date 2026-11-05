@@ -11,9 +11,12 @@ import com.os.gerenciador.dto.response.OrdemServicoResponseDto;
 import com.os.gerenciador.repository.OrdemServicoRepository;
 import com.os.gerenciador.repository.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,6 +75,7 @@ public class OrdemServicoService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = {"ordens", "historicos"}, allEntries = true)
     public void deletarOrdemServico(Long ordemId) {
         ordemServicoRepository.deleteById(ordemId);
     }
@@ -88,15 +92,46 @@ public class OrdemServicoService {
 
     @Transactional
     private List<OrdemServicoModel> findEntitiesByUsuario(Long usuarioId) {
-        return ordemServicoRepository.findAllByUsuarioSolicitante_Id(usuarioId);
+        return ordemServicoRepository.findAllVisibleToUsuario(usuarioId);
     }
 
-    @Transactional public List<OrdemServicoResponseDto> getAllOrdemServicos() { return findAllEntities().stream().map(OrdemServicoMapper::toResponse).toList(); }
-    @Transactional public Optional<OrdemServicoResponseDto> getOrdemServicoById(Long id) { return findEntityById(id).map(OrdemServicoMapper::toResponse); }
-    @Transactional public List<OrdemServicoResponseDto> getOrdemServicosByUsuario(Long id) { return findEntitiesByUsuario(id).stream().map(OrdemServicoMapper::toResponse).toList(); }
-    @Transactional public OrdemServicoResponseDto save(OrdemServicoRequestDto request) { return OrdemServicoMapper.toResponse(saveEntity(request)); }
-    @Transactional public OrdemServicoResponseDto atribuirExecutor(Long id, OrdemServicoExecutorRequest request) { return OrdemServicoMapper.toResponse(atribuirExecutorEntity(id, request)); }
-    @Transactional public OrdemServicoResponseDto finalizarOrdemServico(Long id) { return OrdemServicoMapper.toResponse(finalizarEntity(id)); }
+    @Transactional
+    @Cacheable(cacheNames = "ordens", key = "#p0 + ':' + #p1 + ':' + #p2")
+    public List<OrdemServicoResponseDto> getAllOrdemServicos(Long usuarioId, boolean admin, boolean executor) {
+        List<OrdemServicoModel> ordens = admin ? findAllEntities()
+                : executor ? ordemServicoRepository.findAllVisibleToExecutor(usuarioId)
+                : findEntitiesByUsuario(usuarioId);
+        return ordens.stream().map(OrdemServicoMapper::toResponse).toList();
+    }
+    @Transactional public Optional<OrdemServicoResponseDto> getOrdemServicoById(Long id, Long usuarioId, boolean admin, boolean executor) {
+        return findEntityById(id).filter(ordem -> admin || (executor
+                ? ordem.getStatus() == StatusOS.ABERTA || pertenceAoExecutor(ordem, usuarioId)
+                : ordem.getUsuarioSolicitante().getId() == usuarioId)).map(OrdemServicoMapper::toResponse);
+    }
+    @Transactional public List<OrdemServicoResponseDto> getOrdemServicoByUsuario(Long id) {
+        return findEntitiesByUsuario(id).stream().map(OrdemServicoMapper::toResponse).toList();
+    }
+    @Transactional @CacheEvict(cacheNames = "ordens", allEntries = true)
+    public OrdemServicoResponseDto save(OrdemServicoRequestDto request) { return OrdemServicoMapper.toResponse(saveEntity(request)); }
+    @Transactional @CacheEvict(cacheNames = "ordens", allEntries = true)
+    public OrdemServicoResponseDto atribuirExecutor(Long id, OrdemServicoExecutorRequest request) { return OrdemServicoMapper.toResponse(atribuirExecutorEntity(id, request)); }
+    @Transactional @CacheEvict(cacheNames = "ordens", allEntries = true)
+    public OrdemServicoResponseDto finalizarOrdemServico(Long id, Long usuarioId, boolean admin) {
+        OrdemServicoModel ordem = findEntityById(id).orElseThrow(() -> new EntityNotFoundException("Ordem não encontrada"));
+        if (!admin && (ordem.getUsuarioExecutor() == null || ordem.getUsuarioExecutor().getId() != usuarioId)) {
+            throw new AccessDeniedException("Apenas o executor atribuído pode finalizar esta ordem");
+        }
+        return OrdemServicoMapper.toResponse(finalizarEntity(id));
+    }
+
+    private boolean pertenceAoUsuario(OrdemServicoModel ordem, Long usuarioId) {
+        return ordem.getUsuarioSolicitante().getId() == usuarioId
+                || (ordem.getUsuarioExecutor() != null && ordem.getUsuarioExecutor().getId() == usuarioId);
+    }
+
+    private boolean pertenceAoExecutor(OrdemServicoModel ordem, Long usuarioId) {
+        return ordem.getUsuarioExecutor() != null && ordem.getUsuarioExecutor().getId() == usuarioId;
+    }
 
 
 }

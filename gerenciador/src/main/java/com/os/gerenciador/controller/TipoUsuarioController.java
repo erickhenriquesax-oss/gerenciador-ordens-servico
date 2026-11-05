@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,22 +19,26 @@ public class TipoUsuarioController {
     @Autowired
     private TipoUsuarioService tipoUsuarioService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<TipoUsuarioResponseDto>> findAllTipoUsuario(){
         List<TipoUsuarioResponseDto> list = tipoUsuarioService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TipoUsuarioResponseDto> createTipoUsuario(@Valid @RequestBody TipoUsuarioRequestDto tipoUsuarioRequestDto){
         return ResponseEntity.status(HttpStatus.CREATED).body(tipoUsuarioService.save(tipoUsuarioRequestDto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<TipoUsuarioResponseDto> findById(@Valid @PathVariable Long id){
         return  ResponseEntity.status(HttpStatus.OK).body(tipoUsuarioService.findById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@Valid @PathVariable Long id){
         tipoUsuarioService.deleteById(id);

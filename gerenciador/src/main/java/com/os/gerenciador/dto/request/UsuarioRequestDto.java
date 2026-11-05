@@ -11,8 +11,8 @@ public record UsuarioRequestDto(
         @NotNull @NotBlank String nome,
         @NotBlank @NotNull @Email String email,
         @NotNull @NotBlank String senha,
-        @NotNull @NotBlank String cpf,
-        String telefone,
+        @NotNull @NotBlank @CPF String cpf,
+        @NotNull @NotBlank String telefone,
         @NotNull Long tipoUsuario,
         @NotNull LocalDate dataNascimento
 

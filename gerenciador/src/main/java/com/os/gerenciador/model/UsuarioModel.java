@@ -2,6 +2,7 @@ package com.os.gerenciador.model;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.os.gerenciador.Enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Builder;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Setter;
 import lombok.Builder.Default;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioModel {
+public class UsuarioModel implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,4 +65,5 @@ public class UsuarioModel {
     @Default
     private List<HistoricoOrdemServicoModel> usuarioHistorico = new ArrayList<>();
 
+    public UserRoles getUserRole() { return this.tipoUsuarioModel != null ? this.tipoUsuarioModel.toUserRole() : null; }
 }

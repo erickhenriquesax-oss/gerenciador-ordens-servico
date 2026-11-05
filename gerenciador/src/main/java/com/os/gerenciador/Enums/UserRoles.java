@@ -4,7 +4,8 @@ package com.os.gerenciador.Enums;
 public enum UserRoles {
 
     EXECUTOR(1L, "ROLE_EXECUTOR"),
-    SOLICITANTE(2L, "ROLE_SOLICITANTE");
+    SOLICITANTE(2L, "ROLE_SOLICITANTE"),
+    ADMIN(3L, "ROLE_ADMIN");
 
     private final Long id;
     private final String authority;
@@ -37,7 +38,9 @@ public enum UserRoles {
 
             case "SOLICITANTE": return UserRoles.SOLICITANTE;
 
-            default: return null;
+            case "ADMIN": return UserRoles.ADMIN;
+
+            default: throw new IllegalArgumentException("Descrição de role desconhecida: " + descricao);
         }
     }
 

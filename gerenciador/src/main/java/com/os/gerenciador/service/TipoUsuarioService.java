@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 
@@ -35,12 +37,16 @@ public class TipoUsuarioService {
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "tiposUsuario", allEntries = true)
     public void deleteById(Long id) {
         tipoUsuarioRepository.deleteById(id);
     }
 
-    @Transactional public List<TipoUsuarioResponseDto> findAll() { return findAllEntities().stream().map(TipoUsuarioMapper::toResponse).toList(); }
-    @Transactional public TipoUsuarioResponseDto save(TipoUsuarioRequestDto request) { return TipoUsuarioMapper.toResponse(saveEntity(request)); }
+    @Transactional
+    @Cacheable(cacheNames = "tiposUsuario", key = "'todos'")
+    public List<TipoUsuarioResponseDto> findAll() { return findAllEntities().stream().map(TipoUsuarioMapper::toResponse).toList(); }
+    @Transactional @CacheEvict(cacheNames = "tiposUsuario", allEntries = true)
+    public TipoUsuarioResponseDto save(TipoUsuarioRequestDto request) { return TipoUsuarioMapper.toResponse(saveEntity(request)); }
     @Transactional public TipoUsuarioResponseDto findById(Long id) { return TipoUsuarioMapper.toResponse(findEntityById(id)); }
 
 }

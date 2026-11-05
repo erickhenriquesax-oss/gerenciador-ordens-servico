@@ -1,12 +1,11 @@
 package com.os.gerenciador.dto.request;
 
-import com.os.gerenciador.Enums.StatusOS;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 public record OrdemServicoRequestDto(
-        @NotNull @NotEmpty
-        String descricao,
+        @NotBlank @Size(max = 100) String descricao,
 
         @NotNull Long usuarioSolicitante) {
 }
