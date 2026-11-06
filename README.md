@@ -470,8 +470,10 @@ O perfil `test` não define `api.security.token.secret`. Por isso, o `Gerenciado
 - As listagens não têm paginação nem filtros (por status, por exemplo).
 - Tokens emitidos continuam válidos até expirar, mesmo depois de mudança de papel, troca de senha ou exclusão do usuário.
 - Executores e administradores conseguem consultar CPF, telefone e data de nascimento de qualquer usuário por `GET /usuario/{id}`.
-- O repositório não declara uma licença nem um canal de contato. Defina essas informações antes de distribuir o projeto.
 
 ## Sobre mim
 
 Sou Erick Henrique Pereira e estou em busca da minha primeira oportunidade como desenvolvedor backend Java júnior. Neste projeto, venho trabalhando com Java, Spring Boot, criação de APIs REST, Spring Security e JWT, Spring Data JPA, PostgreSQL, Redis, Maven, Docker Compose e testes com JUnit.
+
+- LinkedIn: [linkedin.com/in/erickhenriquepereira](https://www.linkedin.com/in/erickhenriquepereira/)
+- E-mail: [erickhenriquesax@gmail.com](mailto:erickhenriquesax@gmail.com)
