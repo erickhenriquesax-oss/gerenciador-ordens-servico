@@ -17,8 +17,7 @@ public class UsuarioDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) {
-        var usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+        var usuario = usuarioRepository.findByEmail(UsuarioService.normalizarEmail(email)).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
         var role = usuario.getUserRole();
         return new UsuarioPrincipal(usuario.getId(), usuario.getEmail(), usuario.getSenha(),
                 role == null ? null : role.getAuthority());

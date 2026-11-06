@@ -15,6 +15,6 @@ public final class UsuarioMapper {
     }
 
     public static UsuarioResponseDto toResponse(UsuarioModel model) {
-        return new UsuarioResponseDto(model.getNome(), model.getEmail(), model.getTelefone(), model.getCpf(), model.getDataNascimento());
+        return new UsuarioResponseDto(model.getId(), model.getNome(), model.getEmail(), model.getTelefone(), model.getCpf(), model.getDataNascimento());
     }
 }

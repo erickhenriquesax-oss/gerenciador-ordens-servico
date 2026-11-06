@@ -77,6 +77,9 @@ public class OrdemServicoService {
     @Transactional
     @CacheEvict(cacheNames = {"ordens", "historicos"}, allEntries = true)
     public void deletarOrdemServico(Long ordemId) {
+        if (!ordemServicoRepository.existsById(ordemId)) {
+            throw new EntityNotFoundException("Ordem não encontrada: " + ordemId);
+        }
         ordemServicoRepository.deleteById(ordemId);
     }
 
@@ -100,7 +103,7 @@ public class OrdemServicoService {
     public List<OrdemServicoResponseDto> getAllOrdemServicos(Long usuarioId, boolean admin, boolean executor) {
         List<OrdemServicoModel> ordens = admin ? findAllEntities()
                 : executor ? ordemServicoRepository.findAllVisibleToExecutor(usuarioId)
-                : findEntitiesByUsuario(usuarioId);
+                : ordemServicoRepository.findAllByUsuarioSolicitante_Id(usuarioId);
         return ordens.stream().map(OrdemServicoMapper::toResponse).toList();
     }
     @Transactional public Optional<OrdemServicoResponseDto> getOrdemServicoById(Long id, Long usuarioId, boolean admin, boolean executor) {
@@ -113,7 +116,7 @@ public class OrdemServicoService {
     }
     @Transactional @CacheEvict(cacheNames = "ordens", allEntries = true)
     public OrdemServicoResponseDto save(OrdemServicoRequestDto request) { return OrdemServicoMapper.toResponse(saveEntity(request)); }
-    @Transactional @CacheEvict(cacheNames = "ordens", allEntries = true)
+    @Transactional @CacheEvict(cacheNames = {"ordens", "historicos"}, allEntries = true)
     public OrdemServicoResponseDto atribuirExecutor(Long id, OrdemServicoExecutorRequest request) { return OrdemServicoMapper.toResponse(atribuirExecutorEntity(id, request)); }
     @Transactional @CacheEvict(cacheNames = "ordens", allEntries = true)
     public OrdemServicoResponseDto finalizarOrdemServico(Long id, Long usuarioId, boolean admin) {

@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.NoSuchElementException;
 
@@ -33,6 +34,10 @@ public class UsuarioService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    public static String normalizarEmail(String email) {
+        return email == null ? null : email.strip().toLowerCase(Locale.ROOT);
+    }
 
     @Transactional
     private List<UsuarioModel> findAllEntities(){
@@ -52,6 +57,7 @@ public class UsuarioService {
             throw new AccessDeniedException("O cadastro público permite criar apenas usuários SOLICITANTE");
         }
         UsuarioModel usuarioModel = UsuarioMapper.toModel(usuarioRequestDto, tipoUsuarioModel);
+        usuarioModel.setEmail(normalizarEmail(usuarioRequestDto.email()));
         usuarioModel.setSenha(passwordEncoder.encode(usuarioRequestDto.senha()));
         return usuarioRepository.save(usuarioModel);
     }
@@ -67,14 +73,18 @@ public class UsuarioService {
         usuarioUpdate.setNome(usuarioRequestDto.nome());
         usuarioUpdate.setCpf(usuarioRequestDto.cpf());
         usuarioUpdate.setTelefone(usuarioRequestDto.telefone());
-        usuarioUpdate.setEmail(usuarioRequestDto.email());
+        usuarioUpdate.setEmail(normalizarEmail(usuarioRequestDto.email()));
         usuarioUpdate.setSenha(passwordEncoder.encode(usuarioRequestDto.senha()));
+        usuarioUpdate.setDataNascimento(usuarioRequestDto.dataNascimento());
         return usuarioRepository.save(usuarioUpdate);
     }
 
     @Transactional
     @CacheEvict(cacheNames = "usuarios", allEntries = true)
     public void delete(Long id){
+        if (!usuarioRepository.existsById(id)) {
+            throw new EntityNotFoundException("Usuário não encontrado: " + id);
+        }
         usuarioRepository.deleteById(id);
     }
 
@@ -94,13 +104,19 @@ public class UsuarioService {
     @Transactional
     @Cacheable(cacheNames = "usuarios", key = "'todos'")
     public List<UsuarioResponseDto> findAll() { return findAllEntities().stream().map(UsuarioMapper::toResponse).toList(); }
+
     @Transactional public Optional<UsuarioResponseDto> findById(Long id) { return findEntityById(id).map(UsuarioMapper::toResponse); }
+
     @Transactional @CacheEvict(cacheNames = "usuarios", allEntries = true)
     public UsuarioResponseDto save(UsuarioRequestDto request) { return UsuarioMapper.toResponse(saveEntity(request)); }
+
     @Transactional @CacheEvict(cacheNames = "usuarios", allEntries = true)
     public UsuarioResponseDto update(Long id, UsuarioRequestDto request) { return UsuarioMapper.toResponse(updateEntity(id, request)); }
+
     @Transactional @CacheEvict(cacheNames = "usuarios", allEntries = true)
     public UsuarioResponseDto updateTipoUsuario(Long id, AlternaTipoUsuarioRequest request) { return UsuarioMapper.toResponse(updateTipoUsuarioEntity(id, request)); }
-    @Transactional public List<UsuarioResponseDto> findByTipoUsuario(Long id) { return findEntitiesByTipoUsuario(id).stream().map(UsuarioMapper::toResponse).toList(); }
+
+    @Transactional
+    public List<UsuarioResponseDto> findByTipoUsuario(Long id) { return findEntitiesByTipoUsuario(id).stream().map(UsuarioMapper::toResponse).toList(); }
 
 }

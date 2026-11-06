@@ -12,6 +12,6 @@ public final class TipoUsuarioMapper {
     }
 
     public static TipoUsuarioResponseDto toResponse(TipoUsuarioModel model) {
-        return new TipoUsuarioResponseDto(model.getDescricao());
+        return new TipoUsuarioResponseDto(model.getId(), model.getDescricao());
     }
 }

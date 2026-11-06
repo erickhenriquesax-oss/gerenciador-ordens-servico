@@ -39,6 +39,9 @@ public class TipoUsuarioService {
     @Transactional
     @CacheEvict(cacheNames = "tiposUsuario", allEntries = true)
     public void deleteById(Long id) {
+        if (!tipoUsuarioRepository.existsById(id)) {
+            throw new EntityNotFoundException("Tipo de usuário não encontrado: " + id);
+        }
         tipoUsuarioRepository.deleteById(id);
     }
 

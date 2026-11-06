@@ -8,6 +8,7 @@ import com.os.gerenciador.model.TipoUsuarioModel;
 import com.os.gerenciador.model.UsuarioModel;
 import com.os.gerenciador.repository.OrdemServicoRepository;
 import com.os.gerenciador.repository.UsuarioRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,6 +85,14 @@ class OrdemServicoServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> ordemServicoService.atribuirExecutor(30L, new OrdemServicoExecutorRequest(11L)));
+    }
+
+    @Test
+    void excluirOrdemInexistenteLancaNaoEncontrado() {
+        given(ordemServicoRepository.existsById(99L)).willReturn(false);
+
+        assertThrows(EntityNotFoundException.class, () -> ordemServicoService.deletarOrdemServico(99L));
+        verify(ordemServicoRepository, never()).deleteById(any());
     }
 
     private UsuarioModel usuario(Long id, Long tipoId) {

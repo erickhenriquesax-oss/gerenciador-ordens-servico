@@ -21,6 +21,10 @@ services:
     image: redis:7-alpine
     container_name: controlador-redis
     restart: unless-stopped
+    # O suporte a Docker Compose do Spring Boot não repassa a senha do Redis;
+    # com esta label, a aplicação usa spring.data.redis.* (incluindo a senha).
+    labels:
+      org.springframework.boot.ignore: "true"
     command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?Defina REDIS_PASSWORD no arquivo .env}"]
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Defina REDIS_PASSWORD no arquivo .env}
